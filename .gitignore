@@ -1,2 +1,4 @@
 manuscript/.quarto/*
 manuscript/_manuscript/*
+thesis/.quarto/*
+thesis/_book/*
