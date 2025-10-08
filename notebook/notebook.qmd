@@ -1,7 +1,61 @@
 ---
-title: "notebook"
+title: "How to use R and Python together in Quarto"
+format: html
 ---
 
-## Quarto
+# Example: Sharing objects between R and Python
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+## Create an object in R
+
+In this chunk we:
+
+- load the packages we need (`reticulate` for R - Python communication, `opencodecounts` for example data),
+- ensure Python has access to `pandas` (`py_require("pandas")`), and
+- create a dataframe `df_snomed_r` in R.
+
+```{r}
+library(reticulate)
+library(tidyverse)
+library(opencodecounts)
+library(gt)
+
+py_require("pandas")
+
+df_snomed_r <- snomed_usage
+df_snomed_r
+```
+
+## Access an R object from Python
+
+In the Python chunk:
+
+- We import `pandas` (so we can treat the object as a DataFrame),
+- Then use the `r.` prefix to grab the R object `df_snomed_r` and assign it to a Python variable `df_snomed_py`,
+- Finally, we can work with it just like a normal pandas dataframe, e.g. select a column.
+
+```{python}
+import pandas as pd
+
+df = r.df_snomed_r
+
+top_codes = (
+    df.groupby(["snomed_code", "description"], as_index=False)["usage"]
+    .sum()
+    .sort_values("usage", ascending=False)
+    .head(10)
+)
+```
+
+## Access a Python object from R
+
+- Use `py$` prefix to access all Python objects, e.g., `py$top_codes`
+
+```{r}
+py$top_codes |> 
+    mutate(
+        sem_tag = extract_semantic_tag(description),
+        description = strip_semantic_tag(description)
+        ) |> 
+    select(snomed_code, description, sem_tag, usage) |> 
+    gt()
+```

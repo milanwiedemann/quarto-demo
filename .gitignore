@@ -3,4 +3,6 @@ manuscript/_manuscript/*
 thesis/.quarto/*
 thesis/_book/*
 notebook/.quarto/*
+notebook/notebook.html
+notebook/notebook_files/*
 presentation/.posit/*
